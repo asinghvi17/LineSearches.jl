@@ -382,7 +382,7 @@ function secant(alphas::AbstractArray, slopes::AbstractArray, ia::Integer, ib::I
     return secant(alphas[ia], alphas[ib], slopes[ia], slopes[ib])
 end
 # phi
-function secant2!(ϕdϕ,
+function secant2!(ϕdϕ::F,
                   alphas,
                   values,
                   slopes,
@@ -393,7 +393,7 @@ function secant2!(ϕdϕ,
                   dphi_0::Real,
                   delta::Real = DEFAULTDELTA,
                   sigma::Real = DEFAULTSIGMA,
-                  display::Integer = 0)
+                  display::Integer = 0) where {F}
     a = alphas[ia]
     b = alphas[ib]
     dphi_a = slopes[ia]
@@ -485,7 +485,7 @@ end
 # Given a third point, pick the best two that retain the bracket
 # around the minimum (as defined by HZ, eq. 29)
 # b will be the upper bound, and a the lower bound
-function update!(ϕdϕ,
+function update!(ϕdϕ::F,
                  alphas,
                  values,
                  slopes,
@@ -497,7 +497,7 @@ function update!(ϕdϕ,
                  dphi_0::Real,
                  delta::Real,
                  sigma::Real,
-                 display::Integer = 0)
+                 display::Integer = 0) where {F}
     a = alphas[ia]
     b = alphas[ib]
     T = eltype(slopes)
