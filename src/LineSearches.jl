@@ -1,5 +1,8 @@
 module LineSearches
 
+# Optional no-diagnostic Float64 export policy; not a general solver semantic change.
+const _NUMERIC_EXPORT_MODE = get(ENV,"OPTIM_NUMERIC_EXPORT","0") == "1"
+
 using Printf: @sprintf
 using LinearAlgebra: norm
 using NaNMath: NaNMath

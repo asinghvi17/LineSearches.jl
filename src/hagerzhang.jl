@@ -146,7 +146,7 @@ function (ls::HagerZhang)(ϕdϕ,
         slopes = [dphi_0]
     end
     if display & LINESEARCH > 0
-        println("New linesearch")
+        _hz_diagnostic("New linesearch")
     end
 
 
@@ -181,7 +181,7 @@ function (ls::HagerZhang)(ϕdϕ,
     # satisfies the Wolfe conditions
     if satisfies_wolfe(c, phi_c, dphi_c, phi_0, dphi_0, phi_lim, delta, sigma)
         if display & LINESEARCH > 0
-            println("Wolfe condition satisfied on point alpha = ", c)
+            _hz_diagnostic("Wolfe condition satisfied on point alpha = ", c)
         end
         return c, phi_c # phi_c
     end
@@ -194,7 +194,7 @@ function (ls::HagerZhang)(ϕdϕ,
     cold = -one(T)
     while !isbracketed && iter < linesearchmax
         if display & BRACKET > 0
-            println("bracketing: ia = ", ia,
+            _hz_diagnostic("bracketing: ia = ", ia,
                     ", ib = ", ib,
                     ", c = ", c,
                     ", phi_c = ", phi_c,
@@ -249,7 +249,7 @@ function (ls::HagerZhang)(ϕdϕ,
             if c > alphamax
                 c = alphamax
                 if display & BRACKET > 0
-                    println("bracket: exceeding alphamax, using c = alphamax = ", alphamax,
+                    _hz_diagnostic("bracket: exceeding alphamax, using c = alphamax = ", alphamax,
                     ", cold = ", cold)
                 end
             end
@@ -259,15 +259,15 @@ function (ls::HagerZhang)(ϕdϕ,
                 alphamax = c # shrinks alphamax, assumes that steps >= c can never have finite phi_c and dphi_c
                 iterfinite += 1
                 if display & BRACKET > 0
-                    println("bracket: non-finite value, bisection")
+                    _hz_diagnostic("bracket: non-finite value, bisection")
                 end
                 c = (cold + c) / 2
                 phi_c, dphi_c = ϕdϕ(c)
             end
             if !(isfinite(phi_c) && isfinite(dphi_c))
                 if display & BRACKET > 0
-                    println("Warning: failed to expand interval to bracket with finite values. If this happens frequently, check your function and gradient.")
-                    println("c = ", c,
+                    _hz_diagnostic("Warning: failed to expand interval to bracket with finite values. If this happens frequently, check your function and gradient.")
+                    _hz_diagnostic("c = ", c,
                             ", alphamax = ", alphamax,
                             ", phi_c = ", phi_c,
                             ", dphi_c = ", dphi_c)
@@ -282,7 +282,7 @@ function (ls::HagerZhang)(ϕdϕ,
             push!(slopes, dphi_c)
             if satisfies_wolfe(c, phi_c, dphi_c, phi_0, dphi_0, phi_lim, delta, sigma)
                 if display & LINESEARCH > 0
-                    println("Wolfe condition satisfied during bracketing at alpha = ", c)
+                    _hz_diagnostic("Wolfe condition satisfied during bracketing at alpha = ", c)
                 end
                 return c, phi_c
             end
@@ -294,7 +294,7 @@ function (ls::HagerZhang)(ϕdϕ,
         b = alphas[ib]
         @assert b > a
         if display & LINESEARCH > 0
-            println("linesearch: ia = ", ia,
+            _hz_diagnostic("linesearch: ia = ", ia,
                     ", ib = ", ib,
                     ", a = ", a,
                     ", b = ", b,
@@ -313,12 +313,12 @@ function (ls::HagerZhang)(ϕdϕ,
         @assert B > A
         if B - A < gamma * (b - a)
             if display & LINESEARCH > 0
-                println("Linesearch: secant succeeded")
+                _hz_diagnostic("Linesearch: secant succeeded")
             end
             if ls.check_flatness && nextfloat(values[ia]) >= values[ib] && nextfloat(values[iA]) >= values[iB]
                 # It's so flat, secant didn't do anything useful, time to quit
                 if display & LINESEARCH > 0
-                    println("Linesearch: secant suggests it's flat")
+                    _hz_diagnostic("Linesearch: secant suggests it's flat")
                 end
 
                 return A, values[iA]
@@ -328,7 +328,7 @@ function (ls::HagerZhang)(ϕdϕ,
         else
             # Secant is converging too slowly, use bisection
             if display & LINESEARCH > 0
-                println("Linesearch: secant failed, using bisection")
+                _hz_diagnostic("Linesearch: secant failed, using bisection")
             end
             c = (A + B) / convert(T, 2)
 
@@ -339,7 +339,7 @@ function (ls::HagerZhang)(ϕdϕ,
 
             if satisfies_wolfe(c, phi_c, dphi_c, phi_0, dphi_0, phi_lim, delta, sigma)
                 if display & LINESEARCH > 0
-                    println("Wolfe condition satisfied during bisection at alpha = ", c)
+                    _hz_diagnostic("Wolfe condition satisfied during bisection at alpha = ", c)
                 end
                 return c, phi_c
             end
@@ -417,7 +417,7 @@ function secant2!(ϕdϕ::F,
         c = (a + b) / convert(T, 2)
     end
     if display & SECANT2 > 0
-        println("secant2: a = ", a, ", b = ", b, ", c = ", c)
+        _hz_diagnostic("secant2: a = ", a, ", b = ", b, ", c = ", c)
     end
     # phi_c = phi(tmpc, c) # Replace
     phi_c, dphi_c = ϕdϕ(c)
@@ -429,7 +429,7 @@ function secant2!(ϕdϕ::F,
     ic = length(alphas)
     if satisfies_wolfe(c, phi_c, dphi_c, phi_0, dphi_0, phi_lim, delta, sigma)
         if display & SECANT2 > 0
-            println("secant2: first c satisfied Wolfe conditions")
+            _hz_diagnostic("secant2: first c satisfied Wolfe conditions")
         end
         return true, ic, ic
     end
@@ -439,7 +439,7 @@ function secant2!(ϕdϕ::F,
         return true, iB, iB
     end
     if display & SECANT2 > 0
-        println("secant2: iA = ", iA, ", iB = ", iB, ", ic = ", ic)
+        _hz_diagnostic("secant2: iA = ", iA, ", iB = ", iB, ", ic = ", ic)
     end
     a = alphas[iA]
     b = alphas[iB]
@@ -453,7 +453,7 @@ function secant2!(ϕdϕ::F,
     # Only an interior second secant point is worth an evaluation, for the same reason as the first secant call above
     if (iA == ic || iB == ic) && a < c < b
         if display & SECANT2 > 0
-            println("secant2: second c = ", c)
+            _hz_diagnostic("secant2: second c = ", c)
         end
         # phi_c = phi(tmpc, c) # TODO: Replace
         phi_c, dphi_c = ϕdϕ(c)
@@ -466,7 +466,7 @@ function secant2!(ϕdϕ::F,
         # Check arguments here
         if satisfies_wolfe(c, phi_c, dphi_c, phi_0, dphi_0, phi_lim, delta, sigma)
             if display & SECANT2 > 0
-                println("secant2: second c satisfied Wolfe conditions")
+                _hz_diagnostic("secant2: second c satisfied Wolfe conditions")
             end
             return true, ic, ic
         end
@@ -476,7 +476,7 @@ function secant2!(ϕdϕ::F,
         end
     end
     if display & SECANT2 > 0
-        println("secant2 output: a = ", alphas[iA], ", b = ", alphas[iB])
+        _hz_diagnostic("secant2 output: a = ", alphas[iA], ", b = ", alphas[iB])
     end
     return false, iA, iB
 end
@@ -512,7 +512,7 @@ function update!(ϕdϕ::F,
     phi_c = values[ic]
     dphi_c = slopes[ic]
     if display & UPDATE > 0
-        println("update: ia = ", ia,
+        _hz_diagnostic("update: ia = ", ia,
                 ", a = ", a,
                 ", ib = ", ib,
                 ", b = ", b,
@@ -568,7 +568,7 @@ function bisect!(ϕdϕ,
     @assert b > a
     while b - a > eps(b)
         if display & BISECT > 0
-            println("bisect: a = ", a, ", b = ", b, ", b - a = ", b - a)
+            _hz_diagnostic("bisect: a = ", a, ", b = ", b, ", b - a = ", b - a)
         end
         d = (a + b) / convert(T, 2)
         phi_d, gphi = ϕdϕ(d)
@@ -596,3 +596,6 @@ function bisect!(ϕdϕ,
     end
     return ia, ib, false
 end
+
+# Export mode suppresses debug text only; default Julia behavior is unchanged.
+_hz_diagnostic(args::Vararg{Any,N}) where {N} = _NUMERIC_EXPORT_MODE ? nothing : println(args...)
